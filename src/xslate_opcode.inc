@@ -172,6 +172,36 @@ TXC(include) {
     TX_RETURN_NEXT();
 }
 
+TXC(render_string) {
+    dMY_CXT;
+    dSP;
+    tx_state_t* st;
+
+    ENTER;
+    SAVETMPS;
+    PUSHMARK(SP);
+    XPUSHs(TX_st->engine);
+    XPUSHs(TX_st_sa);
+    PUTBACK;
+    call_method("load_string", G_VOID|G_DISCARD);
+    FREETMPS;
+    LEAVE;
+
+    st = tx_load_template(aTHX_ TX_st->engine, sv_2mortal(newSVpvs("<string>")), FALSE);
+
+    sv_setpvs(TX_st_sa, "");
+
+    ENTER;
+    SAVETMPS;
+    tx_push_frame(aTHX_ st);
+    tx_execute(aTHX_ aMY_CXT_ st, TX_st_sa, TX_st->vars);
+    tx_pop_frame(aTHX_ st, FALSE);
+    FREETMPS;
+    LEAVE;
+
+    TX_RETURN_NEXT();
+}
+
 TXC(find_file) {
     dSP;
 

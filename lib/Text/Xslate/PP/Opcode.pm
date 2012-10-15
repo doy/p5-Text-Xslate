@@ -183,6 +183,17 @@ sub op_include {
     goto $st->{ code }->[ ++$st->{ pc } ]->{ exec_code };
 }
 
+sub op_render_string {
+    my($st) = @_;
+    $st->engine->load_string( $st->{sa} );
+    my $child = Text::Xslate::PP::tx_load_template( $st->engine, '<string>', 0 );
+    $st->push_frame('render_string', undef);
+    my $output = Text::Xslate::PP::tx_execute( $child, $st->{vars} );
+    $st->pop_frame(0);
+    $st->{sa} = $output;
+    goto $st->{ code }->[ ++$st->{ pc } ]->{ exec_code };
+}
+
 sub op_find_file {
     $_[0]->{sa} = eval { $_[0]->engine->find_file($_[0]->{sa}); 1 };
     goto $_[0]->{ code }->[ ++$_[0]->{ pc } ]->{ exec_code };
